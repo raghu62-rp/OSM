@@ -11,6 +11,7 @@ import CartModal from './components/CartModal.jsx';
 import Checkout from './components/Checkout.jsx';
 import Footer from './components/Footer.jsx';
 import { API_BASE_URL } from './config.js';
+import { mockProducts } from './mockData.jsx';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -33,6 +34,9 @@ function App() {
         setFilteredProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
+        // Fallback to mock data so UI remains usable when backend is down
+        setProducts(mockProducts);
+        setFilteredProducts(mockProducts);
       } finally {
         setIsLoading(false);
       }

@@ -29,10 +29,15 @@ const Login = ({ onClose, onLoginSuccess }) => {
         }),
       });
 
-      const data = await response.json();
-      
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseErr) {
+        console.error('Failed to parse JSON response', parseErr);
+      }
+
       if (!response.ok) {
-        throw new Error(data.message || 'Authentication failed');
+        throw new Error((data && data.message) || 'Authentication failed');
       }
 
       localStorage.setItem('token', data.token);
@@ -45,7 +50,13 @@ const Login = ({ onClose, onLoginSuccess }) => {
       onLoginSuccess(data);
       onClose();
     } catch (err) {
-      setError(err.message);
+      console.error('Auth error', err);
+      // Improve message for network errors
+      if (err.message === 'Failed to fetch' || /network/i.test(err.message)) {
+        setError('Unable to contact the server. Please make sure the backend is running (http://localhost:5000)');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
