@@ -23,6 +23,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [apiHealthy, setApiHealthy] = useState(null);
 
   // Load products from API
   useEffect(() => {
@@ -43,6 +44,26 @@ function App() {
     };
     fetchProducts();
     }, []);
+
+  // Periodically check backend health so UI can indicate if API is reachable
+  useEffect(() => {
+    let mounted = true;
+    const checkHealth = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/health`, { cache: 'no-store' });
+        if (!mounted) return;
+        setApiHealthy(res.ok);
+      } catch (err) {
+        if (!mounted) return;
+        setApiHealthy(false);
+      }
+    };
+
+    // initial check and periodic polling every 30s
+    checkHealth();
+    const id = setInterval(checkHealth, 30000);
+    return () => { mounted = false; clearInterval(id); };
+  }, []);
 
     
 
@@ -156,6 +177,11 @@ function App() {
 
   return (
     <div className="App">
+      {apiHealthy === false && (
+        <div style={{background:'#ffe6e6', color:'#8b0000', padding:'10px', textAlign:'center'}}>
+          Backend API not reachable — the app may be running in mock mode.
+        </div>
+      )}
       <Header 
         cartItemCount={getCartItemCount()}
         onCartClick={() => setIsCartOpen(true)}

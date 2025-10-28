@@ -35,6 +35,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 
+app.get('/', (req, res) => res.send('ONLINE SHOPPING MALL API is running'));
+
+// Simple health-check endpoint used by the frontend to detect backend availability
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
 
 app.get('/', (req, res) => res.send('ONLINE SHOPPING MALL API is running'));
 
